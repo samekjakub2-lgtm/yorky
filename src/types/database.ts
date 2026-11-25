@@ -1,6 +1,6 @@
 // ⚠️ Tento súbor sa GENERUJE – needituj ručne.
 //   npx supabase gen types typescript --local > src/types/database.ts
-// Aktuálna verzia bola zostavená podľa supabase/migrations/20261125000001_init.sql;
+// Aktuálna verzia bola zostavená podľa supabase/migrations/ (init + likes_matches);
 // po prvom `supabase start` ju pregeneruj.
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
@@ -57,6 +57,18 @@ export type Database = {
           updated_at?: string;
           user_id?: string;
         };
+        Relationships: [];
+      };
+      likes: {
+        Row: { created_at: string; likee_id: string; liker_id: string };
+        Insert: { created_at?: string; likee_id: string; liker_id: string };
+        Update: { created_at?: string; likee_id?: string; liker_id?: string };
+        Relationships: [];
+      };
+      matches: {
+        Row: { created_at: string; id: string; user_a: string; user_b: string };
+        Insert: { created_at?: string; id?: string; user_a: string; user_b: string };
+        Update: { created_at?: string; id?: string; user_a?: string; user_b?: string };
         Relationships: [];
       };
       messages: {
@@ -205,6 +217,7 @@ export type Database = {
           photo_paths: string[];
         }[];
       };
+      like_profile: { Args: { p_user_id: string }; Returns: string | null };
       start_conversation: { Args: { p_other: string }; Returns: string };
       update_my_location: { Args: { lat: number; lng: number }; Returns: undefined };
     };
