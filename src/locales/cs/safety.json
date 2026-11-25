@@ -1,0 +1,12 @@
+{
+  "block": "Blokovat",
+  "report": "Nahlásit",
+  "reasons": {
+    "fake_profile": "Falešný profil",
+    "harassment": "Obtěžování",
+    "spam": "Spam",
+    "underage": "Nezletilá osoba",
+    "inappropriate_content": "Nevhodný obsah",
+    "other": "Jiné"
+  }
+}

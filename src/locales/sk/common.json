@@ -1,0 +1,16 @@
+{
+  "appName": "Yorky",
+  "loading": "Načítavam…",
+  "retry": "Skúsiť znova",
+  "cancel": "Zrušiť",
+  "save": "Uložiť",
+  "errors": {
+    "generic": "Niečo sa pokazilo. Skús to znova.",
+    "rateLimited": "Príliš veľa pokusov. Chvíľu počkaj."
+  },
+  "tabs": {
+    "discovery": "Okolie",
+    "chat": "Správy",
+    "profile": "Profil"
+  }
+}

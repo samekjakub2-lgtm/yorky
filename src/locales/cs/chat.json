@@ -1,0 +1,9 @@
+{
+  "title": "Zprávy",
+  "empty": "Zatím nemáš žádné konverzace.",
+  "inputPlaceholder": "Napiš zprávu…",
+  "send": "Odeslat",
+  "minutesAgo_one": "před {{count}} minutou",
+  "minutesAgo_few": "před {{count}} minutami",
+  "minutesAgo_other": "před {{count}} minutami"
+}

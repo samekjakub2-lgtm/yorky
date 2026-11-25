@@ -1,0 +1,13 @@
+{
+  "title": "Můj profil",
+  "signOut": "Odhlásit se",
+  "deleteAccount": "Smazat účet",
+  "deleteAccountConfirm": "Opravdu chceš natrvalo smazat účet, fotky i zprávy? Tuto akci nelze vrátit.",
+  "hideDistance": "Skrýt mou vzdálenost",
+  "incognito": "Režim inkognito",
+  "premiumRequired": "Tato funkce je součástí Prémia.",
+  "addPhoto": "Přidat fotku",
+  "age_one": "{{count}} rok",
+  "age_few": "{{count}} roky",
+  "age_other": "{{count}} let"
+}

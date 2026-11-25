@@ -1,0 +1,18 @@
+{
+  "title": "Okolie",
+  "peopleNearby_one": "{{count}} človek v okolí",
+  "peopleNearby_few": "{{count}} ľudia v okolí",
+  "peopleNearby_other": "{{count}} ľudí v okolí",
+  "empty": "Zatiaľ tu nikto nie je.",
+  "distance": {
+    "lessThanOne": "< 1 km",
+    "km": "{{count}} km",
+    "hidden": "Vzdialenosť skrytá"
+  },
+  "location": {
+    "permissionTitle": "Povoľ prístup k polohe",
+    "permissionBody": "Ostatným ukážeme iba zaokrúhlenú vzdialenosť, nikdy tvoju presnú polohu.",
+    "allow": "Povoliť polohu",
+    "denied": "Bez polohy nevieme zobraziť ľudí v okolí."
+  }
+}
