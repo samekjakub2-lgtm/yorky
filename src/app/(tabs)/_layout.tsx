@@ -23,6 +23,14 @@ export default function TabsLayout() {
           renderingMode="template"
         />
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="likes">
+        <NativeTabs.Trigger.Label>{t('tabs.likes')}</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
+          sf={{ default: 'heart', selected: 'heart.fill' }}
+          src={require('@/assets/images/tabIcons/home.png')}
+          renderingMode="template"
+        />
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="chat">
         <NativeTabs.Trigger.Label>{t('tabs.chat')}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon

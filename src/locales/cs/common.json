@@ -9,7 +9,8 @@
     "rateLimited": "Příliš mnoho pokusů. Chvíli počkej."
   },
   "tabs": {
-    "discovery": "Okolí",
+    "discovery": "Objevovat",
+    "likes": "Lajky",
     "chat": "Zprávy",
     "profile": "Profil"
   }
