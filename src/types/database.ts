@@ -218,6 +218,27 @@ export type Database = {
         }[];
       };
       like_profile: { Args: { p_user_id: string }; Returns: string | null };
+      list_incoming_likes: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          age: number;
+          display_name: string;
+          liked_at: string;
+          primary_photo_path: string | null;
+          user_id: string;
+        }[];
+      };
+      list_matches: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          age: number;
+          display_name: string;
+          match_id: string;
+          matched_at: string;
+          primary_photo_path: string | null;
+          user_id: string;
+        }[];
+      };
       start_conversation: { Args: { p_other: string }; Returns: string };
       update_my_location: { Args: { lat: number; lng: number }; Returns: undefined };
     };

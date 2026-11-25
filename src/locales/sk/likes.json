@@ -1,3 +1,21 @@
 {
-  "title": "Lajky"
+  "title": "Lajky",
+  "matches": {
+    "title": "Matche",
+    "empty": "Zatiaľ nemáš žiadny match. Keď sa lajknete navzájom, objaví sa tu."
+  },
+  "incoming": {
+    "title": "Lajkli ťa",
+    "empty": "Zatiaľ ťa nikto nový nelajkol.",
+    "premiumOnly": "Kto ťa lajkol, uvidíš s prémiom."
+  },
+  "actions": {
+    "likeBack": "Lajknúť späť",
+    "unmatch": "Zrušiť"
+  },
+  "matchTitle": "Máte match!",
+  "matchBody": "Ty a {{name}} ste sa lajkli navzájom.",
+  "errors": {
+    "likeFailed": "Lajk sa nepodarilo uložiť. Skús to znova."
+  }
 }

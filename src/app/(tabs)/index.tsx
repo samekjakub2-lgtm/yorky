@@ -9,12 +9,14 @@ import { Spacing } from '@/constants/theme';
 import { useNearbyProfiles, useSyncLocation } from '@/features/discovery/api';
 import { requestLocationPermission } from '@/features/discovery/location';
 import { ProfileTile } from '@/features/discovery/profile-tile';
+import { useToggleLike } from '@/features/likes/use-toggle-like';
 
 export default function DiscoveryScreen() {
   const { t } = useTranslation('discovery');
   const [permission, setPermission] = useState<'unknown' | 'granted' | 'denied'>('unknown');
   const syncLocation = useSyncLocation();
   const nearby = useNearbyProfiles();
+  const toggleLike = useToggleLike();
 
   const askPermission = async () => {
     const granted = await requestLocationPermission();
@@ -62,6 +64,9 @@ export default function DiscoveryScreen() {
                 displayName={item.display_name}
                 age={item.age}
                 distanceBucketKm={item.distance_bucket_km}
+                liked={toggleLike.isLiked(item.id)}
+                likeLoading={toggleLike.isPending(item.id)}
+                onToggleLike={() => toggleLike.toggle(item.id, item.display_name)}
               />
             )}
           />

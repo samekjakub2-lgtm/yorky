@@ -4,6 +4,8 @@
   "peopleNearby_few": "{{count}} lidé poblíž",
   "peopleNearby_other": "{{count}} lidí poblíž",
   "empty": "Zatím tu nikdo není.",
+  "like": "Lajknout",
+  "liked": "Lajknuto",
   "distance": {
     "lessThanOne": "< 1 km",
     "km": "{{count}} km",
