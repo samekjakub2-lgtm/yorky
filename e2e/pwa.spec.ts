@@ -11,6 +11,11 @@ test.describe('bez prihlásenia', () => {
     await expect(page).toHaveURL(/\/sign-in$/);
   });
 
+  test('konverzácia bez prihlásenia presmeruje na prihlásenie', async ({ page }) => {
+    await page.goto('/chat/00000000-0000-0000-0000-000000000000');
+    await expect(page).toHaveURL(/\/sign-in$/);
+  });
+
   test('predvolený jazyk je slovenčina', async ({ page }) => {
     await page.goto('/sign-in');
     await expect(page.locator('html')).toHaveAttribute('lang', 'sk');
