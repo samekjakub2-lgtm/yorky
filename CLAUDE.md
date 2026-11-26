@@ -172,13 +172,13 @@ Schéma je iba v `supabase/migrations/` (poradie podľa časovej pečiatky v ná
 
 | Tabuľka | Obsah | Kto číta | Kto zapisuje |
 |---|---|---|---|
-| `public.profiles` | profil (meno, dátum narodenia, bio, výška, jazyk, skrytie vzdialenosti, inkognito) | vlastník priamo; ostatní **iba cez RPC** `discover_nearby`, `get_profile`, `list_matches`, `list_incoming_likes` | vlastník (len povolené stĺpce); mazanie cez `delete-account` |
+| `public.profiles` | profil (meno, dátum narodenia, bio, výška, jazyk, skrytie vzdialenosti, inkognito) | vlastník priamo; ostatní **iba cez RPC** `discover_nearby`, `get_profile`, `list_matches`, `list_incoming_likes`, `list_conversations` | vlastník (len povolené stĺpce); mazanie cez `delete-account` |
 | `public.profile_photos` | metadáta fotiek (cesta v bucketi `profile-photos`, poradie) | vlastník; súbory ostatných cez Storage politiku `private.can_view_photos_of` | vlastník, cesta musí začínať `<user_id>/` |
 | `private.user_locations` | poloha zaokrúhlená na ~500 m | nikto z klientov, iba RPC | RPC `update_my_location` |
 | `private.rate_limits` | počítadlá rate limitov | nikto z klientov | `private.check_rate_limit` |
 | `public.likes` | like `liker_id → likee_id` | odoslané vlastník; prijaté iba s prémiom | iba RPC `like_profile`; unlike = `DELETE` vlastného |
 | `public.matches` | vzájomný like (`user_a < user_b`) | účastníci bez bloku | iba server (`like_profile`, triggery pri unlike/bloku) |
-| `public.conversations` | 1:1 konverzácia (`user_a < user_b`), chat je otvorený aj bez matchu | účastníci bez bloku | iba RPC `start_conversation` |
+| `public.conversations` | 1:1 konverzácia (`user_a < user_b`), chat je otvorený aj bez matchu | účastníci bez bloku; zoznam s menom druhej strany cez RPC `list_conversations` | iba RPC `start_conversation` |
 | `public.messages` | správy v konverzácii | účastníci konverzácie bez bloku | odosielateľ v mene seba; príjemca mení iba `read_at` |
 | `public.blocks` | blok `blocker_id → blocked_id` | iba blokujúci | blokujúci (insert/delete) |
 | `public.reports` | nahlásenie používateľa | iba nahlasujúci | nahlasujúci (insert); riešenie cez service_role |
@@ -213,6 +213,6 @@ Pravidlá pre ďalšie kroky:
 
 - Stripe: Checkout + Customer Portal, Route Handler `api/stripe/webhook` (podpis, stav zo Stripe API → `entitlements`, `subscriptions`, `stripe_customers`).
 - Edge Function `send-push` (VAPID, payload iba `{ "type": … }`), spúšťaná DB webhookom na `messages`/`matches`.
-- Chat: riadky konverzácií (cez RPC), stránka `chat/[id]`.
+- Chat: odosielanie fotiek, stránkovanie starších správ (teraz posledných 50).
 - Fotky: upload v profile a zobrazenie cez podpísané URL; obrazovka premium; export dát (GDPR).
 - CSP hlavička (s nonce) a ikony podľa dizajnu.

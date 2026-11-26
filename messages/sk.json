@@ -19,7 +19,18 @@
     "empty": "Zatiaľ nemáš žiadne konverzácie.",
     "inputPlaceholder": "Napíš správu…",
     "send": "Odoslať",
-    "minutesAgo": "{count, plural, one {pred # minútou} few {pred # minútami} other {pred # minútami}}"
+    "minutesAgo": "{count, plural, one {pred # minútou} few {pred # minútami} other {pred # minútami}}",
+    "back": "Späť na správy",
+    "messageLabel": "Správa",
+    "noMessages": "Zatiaľ žiadne správy. Napíš prvý.",
+    "you": "Ty: {body}",
+    "read": "Prečítané",
+    "unread": "{count, plural, one {# neprečítaná správa} few {# neprečítané správy} other {# neprečítaných správ}}",
+    "notFound": "Táto konverzácia neexistuje alebo už nie je dostupná.",
+    "errors": {
+      "sendFailed": "Správu sa nepodarilo odoslať. Skús to znova.",
+      "loadFailed": "Správy sa nepodarilo načítať."
+    }
   },
   "common": {
     "appName": "Yorky",
@@ -73,12 +84,14 @@
     },
     "actions": {
       "likeBack": "Lajknúť späť",
-      "unmatch": "Zrušiť"
+      "unmatch": "Zrušiť",
+      "message": "Napísať"
     },
     "matchTitle": "Máte match!",
     "matchBody": "Ty a {name} ste sa lajkli navzájom.",
     "errors": {
-      "likeFailed": "Lajk sa nepodarilo uložiť. Skús to znova."
+      "likeFailed": "Lajk sa nepodarilo uložiť. Skús to znova.",
+      "chatFailed": "Chat sa nepodarilo otvoriť. Skús to znova."
     }
   },
   "profile": {
