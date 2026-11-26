@@ -6,6 +6,11 @@ test.describe('bez prihlásenia', () => {
     await expect(page).toHaveURL(/\/sign-in$/);
   });
 
+  test('onboarding bez prihlásenia presmeruje na prihlásenie', async ({ page }) => {
+    await page.goto('/onboarding');
+    await expect(page).toHaveURL(/\/sign-in$/);
+  });
+
   test('predvolený jazyk je slovenčina', async ({ page }) => {
     await page.goto('/sign-in');
     await expect(page.locator('html')).toHaveAttribute('lang', 'sk');

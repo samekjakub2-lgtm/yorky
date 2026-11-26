@@ -58,7 +58,8 @@
       "denied": "Bez polohy nevieme zobraziť ľudí v okolí."
     },
     "peopleNearby": "{count, plural, one {# človek v okolí} few {# ľudia v okolí} other {# ľudí v okolí}}",
-    "loading": "Načítavam…"
+    "loading": "Načítavam…",
+    "photoAlt": "Fotka používateľa {name}"
   },
   "likes": {
     "title": "Lajky",
@@ -92,7 +93,32 @@
     "addPhoto": "Pridať fotku",
     "age": "{count, plural, one {# rok} few {# roky} other {# rokov}}",
     "cancel": "Zrušiť",
-    "deleteFailed": "Účet sa nepodarilo zmazať. Skús to znova."
+    "deleteFailed": "Účet sa nepodarilo zmazať. Skús to znova.",
+    "details": {
+      "title": "O mne",
+      "nameLabel": "Meno alebo prezývka",
+      "bioLabel": "Krátky popis",
+      "bioPlaceholder": "Napíš pár slov o sebe…",
+      "bioCounter": "{count}/{max}",
+      "heightLabel": "Výška v cm (nepovinné)",
+      "heightPlaceholder": "napr. 180",
+      "saved": "Uložené.",
+      "invalid": "Skontroluj údaje: meno 1 – 30 znakov, výška 120 – 230 cm."
+    },
+    "photos": {
+      "title": "Fotky",
+      "count": "{count}/{max}",
+      "alt": "Moja fotka {index}",
+      "primary": "Hlavná",
+      "delete": "Zmazať fotku {index}",
+      "add": "Pridať",
+      "privacyHint": "Pred nahraním z fotky odstránime polohu a ďalšie metadáta. Prvá fotka sa zobrazuje v okolí.",
+      "errors": {
+        "tooLarge": "Fotka je príliš veľká (max. 25 MB).",
+        "notImage": "Vyber obrázok.",
+        "failed": "Fotku sa nepodarilo uložiť. Skús to znova."
+      }
+    }
   },
   "safety": {
     "block": "Blokovať",
@@ -119,5 +145,19 @@
     "enable": "Zapnúť upozornenia",
     "enabled": "Upozornenia sú zapnuté.",
     "error": "Upozornenia sa nepodarilo zapnúť."
+  },
+  "onboarding": {
+    "title": "Vytvor si profil",
+    "subtitle": "Stačí meno a dátum narodenia. Ostatné doplníš neskôr.",
+    "nameLabel": "Meno alebo prezývka",
+    "nameHint": "Ostatní uvidia iba toto meno, nie tvoj e-mail.",
+    "birthDateLabel": "Dátum narodenia",
+    "birthDateHint": "Ostatní uvidia iba tvoj vek, nie dátum narodenia.",
+    "submit": "Pokračovať",
+    "errors": {
+      "name": "Zadaj meno (1 – 30 znakov).",
+      "tooYoung": "Yorky je iba pre osoby staršie ako 18 rokov.",
+      "birthDate": "Zadaj platný dátum narodenia."
+    }
   }
 }
