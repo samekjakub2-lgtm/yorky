@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
@@ -13,6 +14,7 @@ export function LikesView() {
   const t = useTranslations('likes');
   const tProfile = useTranslations('profile');
   const tCommon = useTranslations('common');
+  const tPremium = useTranslations('premium');
   const premium = usePremium();
   const isPremium = premium.data === true;
   const matches = useMatches();
@@ -75,7 +77,14 @@ export function LikesView() {
         {isPremium ? (
           renderList(incoming.data ?? [], t('incoming.empty'), t('actions.likeBack'))
         ) : (
-          <p className="text-muted text-sm">{t('incoming.premiumOnly')}</p>
+          <div className="bg-surface flex flex-col gap-3 rounded-2xl p-4">
+            <p className="text-muted text-sm">{t('incoming.premiumOnly')}</p>
+            <Link
+              href="/premium"
+              className="bg-foreground text-background inline-flex min-h-12 items-center justify-center rounded-2xl px-6 text-sm font-semibold">
+              {tPremium('upsell')}
+            </Link>
+          </div>
         )}
       </section>
     </>

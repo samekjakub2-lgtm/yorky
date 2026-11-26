@@ -119,5 +119,43 @@
     "enable": "Zapnúť upozornenia",
     "enabled": "Upozornenia sú zapnuté.",
     "error": "Upozornenia sa nepodarilo zapnúť."
+  },
+  "premium": {
+    "title": "Prémium",
+    "headline": "Získaj viac z Yorky",
+    "subtitle": "Prémium ti odomkne funkcie pre viac súkromia a lepší prehľad.",
+    "benefits": {
+      "label": "Čo získaš",
+      "incomingLikes": "Uvidíš, kto ťa lajkol",
+      "incognito": "Inkognito režim – v objavovaní ťa nikto neuvidí",
+      "support": "Podporíš nezávislú aplikáciu bez reklám a sledovania"
+    },
+    "plans": {
+      "label": "Vyber si plán",
+      "monthly": "Mesačne",
+      "yearly": "Ročne",
+      "priceMonth": "{price} / mesiac",
+      "priceYear": "{price} / rok",
+      "perMonth": "{price} mesačne",
+      "save": "Ušetríš {percent} %"
+    },
+    "cta": "Pokračovať na platbu",
+    "finePrint": "Predplatné sa automaticky obnovuje. Zrušiť ho môžeš kedykoľvek v správe predplatného. Platbu bezpečne spracuje Stripe – údaje o karte k nám nikdy neprídu.",
+    "unavailable": "Prémium momentálne nie je dostupné. Skús to neskôr.",
+    "active": {
+      "title": "Prémium je aktívne",
+      "body": "Ďakujeme, že podporuješ Yorky.",
+      "manage": "Spravovať predplatné"
+    },
+    "checkout": {
+      "success": "Platba prebehla. Aktivujeme prémium…",
+      "pending": "Aktivácia trvá dlhšie ako zvyčajne. Prémium sa zapne do pár minút.",
+      "canceled": "Platba bola zrušená. Nič sa ti nestrhlo."
+    },
+    "errors": {
+      "checkoutFailed": "Platbu sa nepodarilo spustiť. Skús to znova.",
+      "portalFailed": "Správu predplatného sa nepodarilo otvoriť. Skús to znova."
+    },
+    "upsell": "Získať Prémium"
   }
 }

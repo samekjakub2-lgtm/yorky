@@ -1,6 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
 
@@ -40,6 +41,7 @@ function Toggle({
 
 export function ProfileView() {
   const t = useTranslations('profile');
+  const tPremium = useTranslations('premium');
   const queryClient = useQueryClient();
   const profile = useMyProfile();
   const premium = usePremium();
@@ -78,9 +80,20 @@ export function ProfileView() {
             onChange={(is_incognito) => update({ is_incognito })}
           />
           {premium.data !== true ? (
-            <p className="text-muted py-2 text-sm">{t('premiumRequired')}</p>
+            <p className="text-muted py-2 text-sm">
+              {t('premiumRequired')}{' '}
+              <Link href="/premium" className="text-accent inline-block py-3 font-semibold">
+                {tPremium('upsell')}
+              </Link>
+            </p>
           ) : null}
           <PushToggle />
+          <Link href="/premium" className="flex min-h-12 items-center justify-between gap-4">
+            <span>{tPremium('title')}</span>
+            <span className="text-muted text-sm">
+              {premium.data === true ? tPremium('active.title') : tPremium('upsell')}
+            </span>
+          </Link>
         </section>
       ) : null}
 
