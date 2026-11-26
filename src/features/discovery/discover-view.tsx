@@ -7,6 +7,7 @@ import { Button } from '@/components/button';
 import { PageHeader } from '@/components/page-header';
 import { useNearbyProfiles, useSyncLocation } from '@/features/discovery/api';
 import { ProfileTile } from '@/features/discovery/profile-tile';
+import { useSignedPhotoUrls } from '@/features/profile/api';
 
 type Permission = 'unknown' | 'prompt' | 'granted' | 'denied';
 
@@ -15,6 +16,10 @@ export function DiscoverView() {
   const [permission, setPermission] = useState<Permission>('unknown');
   const syncLocation = useSyncLocation();
   const nearby = useNearbyProfiles(permission === 'granted' && syncLocation.isSuccess);
+  // Hlavné fotky všetkých dlaždíc jednou dávkovou požiadavkou na podpísané URL.
+  const photoUrls = useSignedPhotoUrls(
+    (nearby.data ?? []).flatMap((p) => (p.primary_photo_path ? [p.primary_photo_path] : [])),
+  );
 
   // Ak už je poloha povolená, rovno ju zosynchronizuj (bez ďalšej otázky).
   useEffect(() => {
@@ -74,6 +79,11 @@ export function DiscoverView() {
                     displayName={person.display_name}
                     age={person.age}
                     distanceBucketKm={person.distance_bucket_km}
+                    photoUrl={
+                      person.primary_photo_path
+                        ? photoUrls.data?.get(person.primary_photo_path)
+                        : undefined
+                    }
                   />
                 </li>
               ))}
