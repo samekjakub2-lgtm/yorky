@@ -13,7 +13,11 @@ export function useSendOtp() {
     mutationFn: async (email: string) => {
       const { error } = await createClient().auth.signInWithOtp({
         email: EmailSchema.parse(email.trim().toLowerCase()),
-        options: { shouldCreateUser: true },
+        options: {
+          shouldCreateUser: true,
+          // Ak e-mail obsahuje odkaz namiesto kódu, vráti používateľa sem (PKCE).
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
       if (error) throw error;
     },

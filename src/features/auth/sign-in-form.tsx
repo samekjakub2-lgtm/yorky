@@ -62,6 +62,7 @@ export function SignInForm() {
 
   return (
     <form onSubmit={onVerify} className="flex flex-col gap-4" noValidate>
+      <p className="text-sm opacity-80">{t('checkEmail')}</p>
       <TextField
         label={t('codeLabel')}
         inputMode="numeric"
