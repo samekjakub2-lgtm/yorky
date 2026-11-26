@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { publicEnv } from '@/lib/env';
 
-const PUBLIC_PATHS = ['/sign-in'];
+const PUBLIC_PATHS = ['/sign-in', '/auth/callback'];
 
 /** Obnoví Supabase session v cookies a chráni rozhranie aplikácie. */
 export async function proxy(request: NextRequest) {

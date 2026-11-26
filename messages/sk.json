@@ -8,6 +8,7 @@
     "codeLabel": "Kód z e-mailu",
     "verify": "Prihlásiť sa",
     "changeEmail": "Zmeniť e-mail",
+    "checkEmail": "Poslali sme ti e-mail. Zadaj kód z neho alebo klikni na odkaz v ňom – v tomto istom prehliadači.",
     "ageNotice": "Aplikácia je určená iba pre osoby staršie ako 18 rokov.",
     "errors": {
       "invalidEmail": "Zadaj platný e-mail.",
