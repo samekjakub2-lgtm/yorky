@@ -479,6 +479,18 @@ export type Database = {
         }[];
       };
       like_profile: { Args: { p_user_id: string }; Returns: string };
+      list_conversations: {
+        Args: { p_conversation_id?: string };
+        Returns: {
+          conversation_id: string;
+          display_name: string;
+          last_message_at: string;
+          last_message_body: string;
+          last_message_from_me: boolean;
+          unread_count: number;
+          user_id: string;
+        }[];
+      };
       list_incoming_likes: {
         Args: Record<PropertyKey, never>;
         Returns: {

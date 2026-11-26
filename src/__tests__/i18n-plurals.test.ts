@@ -29,4 +29,16 @@ describe('slovenské a české plurály', () => {
       createTranslator({ locale: 'cs', messages: cs, namespace: 'profile' })('age', { count: 5 }),
     ).toBe('5 let');
   });
+
+  it.each([
+    ['sk', 1, '1 neprečítaná správa'],
+    ['sk', 3, '3 neprečítané správy'],
+    ['sk', 5, '5 neprečítaných správ'],
+    ['cs', 1, '1 nepřečtená zpráva'],
+    ['cs', 2, '2 nepřečtené zprávy'],
+    ['cs', 9, '9 nepřečtených zpráv'],
+  ] as const)('neprečítané %s, %d → %s', (locale, count, expected) => {
+    const t = createTranslator({ locale, messages: locale === 'sk' ? sk : cs, namespace: 'chat' });
+    expect(t('unread', { count })).toBe(expected);
+  });
 });
