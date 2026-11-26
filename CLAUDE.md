@@ -41,7 +41,7 @@ src/
   app/
     (auth)/sign-in/         # prihlásenie e-mailovým OTP kódom
     (app)/                  # chránená časť: discover, likes, chat, profile (+ spodná navigácia)
-    api/stripe/webhook/     # Route Handler pre Stripe webhook (zatiaľ nie je)
+    api/stripe/webhook/     # Route Handler pre Stripe webhook (logika vo features/premium/webhook.ts)
     serwist/[path]/route.ts # zostaví a servuje /serwist/sw.js
     manifest.ts             # Web App Manifest (lokalizovaný)
     sw.ts                   # zdroj service workera (cache iba statiky, Web Push)
@@ -211,8 +211,7 @@ Pravidlá pre ďalšie kroky:
 
 ## Rozpracované (ďalšie kroky)
 
-- Stripe: Checkout + Customer Portal, Route Handler `api/stripe/webhook` (podpis, stav zo Stripe API → `entitlements`, `subscriptions`, `stripe_customers`).
 - Edge Function `send-push` (VAPID, payload iba `{ "type": … }`), spúšťaná DB webhookom na `messages`/`matches`.
 - Chat: odosielanie fotiek, stránkovanie starších správ (teraz posledných 50).
-- Fotky: upload v profile a zobrazenie cez podpísané URL; obrazovka premium; export dát (GDPR).
+- Fotky: upload v profile a zobrazenie cez podpísané URL; export dát (GDPR).
 - CSP hlavička (s nonce) a ikony podľa dizajnu.

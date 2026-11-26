@@ -466,6 +466,7 @@ export type Database = {
           primary_photo_path: string;
         }[];
       };
+      get_my_stripe_customer_id: { Args: Record<PropertyKey, never>; Returns: string };
       get_profile: {
         Args: { p_user_id: string };
         Returns: {
