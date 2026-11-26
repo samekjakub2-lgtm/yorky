@@ -3,12 +3,15 @@ import type { ReactNode } from 'react';
 
 import { BottomNav } from '@/components/bottom-nav';
 import { UserIdProvider } from '@/features/auth/user-context';
+import { hasMyProfile } from '@/features/profile/queries';
 import { getUserId } from '@/lib/supabase/server';
 
 /** Chránená časť aplikácie. Používateľa overuje server (getClaims), nie klient. */
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const userId = await getUserId();
   if (!userId) redirect('/sign-in');
+  // Bez profilu (prvé prihlásenie) najprv onboarding.
+  if (!(await hasMyProfile())) redirect('/onboarding');
 
   return (
     <UserIdProvider userId={userId}>

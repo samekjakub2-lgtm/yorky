@@ -10,6 +10,8 @@ import { signOut } from '@/features/auth/actions';
 import { usePremium } from '@/features/premium/use-premium';
 import { deleteMyAccount, updateMyProfile } from '@/features/profile/actions';
 import { profileKeys, useMyProfile } from '@/features/profile/api';
+import { PhotoManager } from '@/features/profile/photo-manager';
+import { ProfileDetailsForm } from '@/features/profile/profile-details-form';
 import { PushToggle } from '@/features/push/push-toggle';
 
 function Toggle({
@@ -63,8 +65,24 @@ export function ProfileView() {
     <>
       <PageHeader title={t('title')} />
       {profile.data ? (
+        <div className="mb-8 flex flex-col gap-8">
+          <PhotoManager />
+          <section aria-labelledby="details-title" className="flex flex-col gap-3">
+            <h2 id="details-title" className="text-lg font-semibold">
+              {t('details.title')}
+            </h2>
+            <ProfileDetailsForm
+              initial={{
+                display_name: profile.data.display_name,
+                bio: profile.data.bio,
+                height_cm: profile.data.height_cm,
+              }}
+            />
+          </section>
+        </div>
+      ) : null}
+      {profile.data ? (
         <section className="flex flex-col divide-y divide-black/5 dark:divide-white/10">
-          <p className="pb-3 text-lg font-semibold">{profile.data.display_name}</p>
           <Toggle
             label={t('hideDistance')}
             checked={profile.data.hide_distance}
