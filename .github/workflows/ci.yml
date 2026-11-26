@@ -26,5 +26,14 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - run: supabase db start
       - run: supabase test db
+      - name: Types match migrations
+        run: |
+          supabase gen types typescript --local > src/types/database.ts
+          npx --yes prettier@3 --write src/types/database.ts
+          git diff --exit-code -- src/types/database.ts || {
+            echo "::error::src/types/database.ts nesedí s migráciami – spusti npm run db:types"; exit 1; }

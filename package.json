@@ -62,7 +62,7 @@
     "test": "jest",
     "test:db": "supabase test db",
     "test:db:local": "./scripts/db/test-local.sh",
-    "db:types": "supabase gen types typescript --local > src/types/database.ts",
+    "db:types": "supabase gen types typescript --local > src/types/database.ts && prettier --write src/types/database.ts",
     "check": "npm run lint && npm run typecheck && npm test"
   },
   "private": true,

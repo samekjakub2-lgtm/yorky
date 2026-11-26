@@ -35,11 +35,12 @@ nedobrovoľnému outingu, vydieraniu alebo fyzickému ohrozeniu. Preto:
 src/
   app/                  # Expo Router – iba obrazovky a layouty (tenké)
     (auth)/             # prihlásenie e-mailovým OTP kódom
-    (tabs)/             # index = discovery, chat, profile
+    (tabs)/             # index = discovery, likes, chat, profile
   components/           # znovupoužiteľné UI komponenty (bez dátovej logiky)
   features/             # doménová logika podľa funkcie
     auth/               # session store (Zustand), OTP prihlásenie
     discovery/          # poloha, pásma vzdialenosti, ľudia v okolí
+    likes/              # like-y, matche, prichádzajúce like-y (prémium)
     profile/            # môj profil, cudzí profil cez RPC, upload fotiek bez EXIF
     chat/               # konverzácie, správy, Realtime
     paywall/            # stav prémia zo servera
@@ -121,6 +122,39 @@ s polohou – stráži to test `supabase/tests/01_location_privacy.test.sql`.
 - Množné čísla cez i18next plurály (`_one`, `_few`, `_other`) – SK aj CZ majú tvar pre 2–4.
 - Jazyk sa berie zo zariadenia (`expo-localization`), fallback `sk`.
 - Dátumy a čísla formátuj cez `Intl` podľa aktívneho jazyka.
+
+## Databáza
+
+Schéma je iba v `supabase/migrations/` (poradie podľa časovej pečiatky v názve), testy v `supabase/tests/`.
+
+| Tabuľka | Obsah | Kto číta | Kto zapisuje |
+|---|---|---|---|
+| `public.profiles` | profil (meno, dátum narodenia, bio, výška, jazyk, skrytie vzdialenosti, inkognito) | vlastník priamo; ostatní **iba cez RPC** `discover_nearby`, `get_profile`, `list_matches`, `list_incoming_likes` | vlastník (len povolené stĺpce); mazanie cez `delete-account` |
+| `public.profile_photos` | metadáta fotiek (cesta v bucketi `profile-photos`, poradie) | vlastník; súbory ostatných cez Storage politiku `private.can_view_photos_of` | vlastník, cesta musí začínať `<user_id>/` |
+| `private.user_locations` | poloha zaokrúhlená na ~500 m | nikto z klientov, iba RPC | RPC `update_my_location` |
+| `private.rate_limits` | počítadlá rate limitov | nikto z klientov | `private.check_rate_limit` |
+| `public.likes` | like `liker_id → likee_id` | odoslané vlastník; prijaté iba s prémiom | iba RPC `like_profile`; unlike = `DELETE` vlastného |
+| `public.matches` | vzájomný like (`user_a < user_b`) | účastníci bez bloku | iba server (`like_profile`, triggery pri unlike/bloku) |
+| `public.conversations` | 1:1 konverzácia (`user_a < user_b`), chat je otvorený aj bez matchu | účastníci bez bloku | iba RPC `start_conversation` |
+| `public.messages` | správy v konverzácii | účastníci konverzácie bez bloku | odosielateľ v mene seba; príjemca mení iba `read_at` |
+| `public.blocks` | blok `blocker_id → blocked_id` | iba blokujúci | blokujúci (insert/delete) |
+| `public.reports` | nahlásenie používateľa | iba nahlasujúci | nahlasujúci (insert); riešenie cez service_role |
+| `public.entitlements` | **zdroj pravdy o prémiu** (`is_premium`, `expires_at`) | vlastník | iba webhook RevenueCat (service_role) |
+| `public.subscriptions` | prehľad predplatných z RevenueCat (produkt, obchod, expirácia) – len na zobrazenie | vlastník | iba webhook RevenueCat (service_role) |
+
+Pravidlá pre ďalšie kroky:
+- Nová tabuľka = nová migrácia s `enable row level security`, politikami pre select/insert/update/delete
+  (alebo komentárom, prečo politika chýba) a pgTAP testom v novom súbore `supabase/tests/NN_*.test.sql`.
+- Blokovanie platí **oboma smermi** – používaj `private.is_blocked_with(other)` v politikách aj RPC.
+- Údaje iných používateľov vracaj iba cez `SECURITY DEFINER` RPC s kontrolou `auth.uid()`, blokovania
+  a inkognita; nikdy nevracaj polohu (stráži `01_location_privacy`).
+- Zápisy, ktoré musí overiť server (match, konverzácia, like), idú cez RPC, nie priamy `INSERT`.
+- Prémium overuj iba cez `private.has_premium(uid)` / `entitlements`, nikdy cez `subscriptions` ani ID produktu.
+- Nové dáta naviaž na `profiles`/`auth.users` cez `on delete cascade`, aby zmazanie účtu zmazalo všetko;
+  súbory v Storage maže Edge Function `delete-account`.
+- Po každej migrácii pregeneruj typy (`npm run db:types` lokálne s Dockerom; na vetve ich vygeneruje
+  a commitne workflow `DB types`, CI na PR kontroluje, že sedia). `src/types/database.ts` needituj ručne.
+- DB testy: `npm run test:db` (Docker) alebo `npm run test:db:local`; CI ich spúšťa na každom PR.
 
 ## Ďalšie pravidlá súkromia a bezpečnosti
 - Fotky v **privátnom** Storage buckete, prístup iba cez podpísané URL s krátkou platnosťou.
