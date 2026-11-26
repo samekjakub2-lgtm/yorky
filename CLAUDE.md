@@ -1,127 +1,157 @@
 # Yorky
 
-Mobilná zoznamka pre gay, bi a queer mužov na Slovensku a v Česku (iOS + Android).
+Mobilná zoznamka pre gay, bi a queer mužov na Slovensku a v Česku.
+Progresívna webová aplikácia (PWA), neskôr prípadne natívny obal cez Capacitor.
 
 ## Produkt
 
 - **Profil** – fotky, krátky popis, voliteľné údaje (vek, výška, záujmy, čo hľadám).
-- **Discovery** – mriežka ľudí v okolí zoradená podľa vzdialenosti (zobrazuje sa len zaokrúhlená vzdialenosť).
+- **Discovery** – mriežka ľudí v okolí zoradená podľa vzdialenosti (zobrazuje sa len pásmo vzdialenosti).
 - **Chat** – 1:1 správy v reálnom čase, odosielanie fotiek.
 - **Bezpečnosť** – blokovanie, nahlasovanie, skrytie vzdialenosti, inkognito režim (prémium).
-- **Prémium** – predplatné cez RevenueCat (napr. neobmedzené prehliadanie, inkognito, filtre).
+- **Prémium** – predplatné cez Stripe (napr. neobmedzené prehliadanie, inkognito, filtre).
 
 ### Citlivosť dát
 Sexuálna orientácia je **osobitná kategória osobných údajov (čl. 9 GDPR)**. Únik dát môže viesť k
 nedobrovoľnému outingu, vydieraniu alebo fyzickému ohrozeniu. Preto:
 - minimalizácia dát – nezbierame nič, čo nevyhnutne nepotrebujeme,
-- používateľ musí mať možnosť exportu dát a úplného zmazania účtu (vrátane fotiek a správ),
+- používateľ musí mať možnosť exportu dát a úplného zmazania účtu (vrátane fotiek, správ a predplatného),
 - pri každom rozhodnutí má súkromie prednosť pred pohodlím či metrikami.
 
 ## Stack
 
 | Oblasť | Technológia |
 |---|---|
-| Aplikácia | Expo (managed workflow), TypeScript `strict`, Expo Router |
+| Aplikácia | Next.js (App Router), TypeScript `strict`, Tailwind CSS |
 | Backend | Supabase – Postgres + PostGIS, Auth, Storage, Realtime, Edge Functions |
-| Platby | RevenueCat (`react-native-purchases`) + webhook do Edge Function |
-| Server state | TanStack Query |
-| Client state | Zustand |
-| Validácia | Zod (formuláre, odpovede API, vstupy Edge Functions) |
-| i18n | `i18next`, `react-i18next`, `expo-localization` |
+| Auth v Next.js | `@supabase/ssr` (session v cookies, obnova v `middleware.ts`) |
+| i18n | `next-intl` – jazyky `sk`, `cs` |
+| PWA | Web App Manifest (`src/app/manifest.ts`), service worker (Serwist), Web Push (VAPID) |
+| Platby | Stripe Checkout + Customer Portal, webhook → tabuľka `entitlements` |
+| Client state | TanStack Query (dáta v klientských komponentoch, Realtime) |
+| Validácia | Zod (formuláre, Server Actions, Route Handlers, Edge Functions) |
+| Testy | Vitest (unit), Playwright (e2e na mobilnom viewporte), pgTAP (DB) |
+| Nasadenie | Vercel (aplikácia), Supabase Cloud (DB, Edge Functions) |
+| Neskôr | Capacitor (natívny obal pre iOS/Android) |
 
 ## Štruktúra priečinkov
 
 ```
 src/
-  app/                  # Expo Router – iba obrazovky a layouty (tenké)
-    (auth)/             # prihlásenie e-mailovým OTP kódom
-    (tabs)/             # index = discovery, likes, chat, profile
-  components/           # znovupoužiteľné UI komponenty (bez dátovej logiky)
-  features/             # doménová logika podľa funkcie
-    auth/               # session store (Zustand), OTP prihlásenie
-    discovery/          # poloha, pásma vzdialenosti, ľudia v okolí
-    likes/              # like-y, matche, prichádzajúce like-y (prémium)
-    profile/            # môj profil, cudzí profil cez RPC, upload fotiek bez EXIF
-    chat/               # konverzácie, správy, Realtime
-    paywall/            # stav prémia zo servera
-    safety/             # blokovanie, nahlasovanie
-  lib/                  # supabase.ts, revenuecat.ts, i18n.ts, env.ts, secure-storage.ts
-  locales/sk|cs/        # JSON preklady podľa namespace (common, auth, discovery…)
-  providers/            # AppProviders (i18n, TanStack Query, auth listener)
-  types/database.ts     # GENEROVANÉ: `npm run db:types`
-  __tests__/            # Jest testy
+  app/
+    (auth)/sign-in/         # prihlásenie e-mailovým OTP kódom
+    (app)/                  # chránená časť: discover, likes, chat, chat/[id], profile, premium
+    api/stripe/webhook/     # Route Handler pre Stripe webhook
+    manifest.ts             # Web App Manifest
+    sw.ts                   # zdroj service workera (Serwist)
+  components/               # znovupoužiteľné UI komponenty (bez dátovej logiky)
+  features/                 # doménová logika podľa funkcie
+    auth/ discovery/ likes/ profile/ chat/ premium/ safety/ push/
+  lib/
+    supabase/
+      client.ts             # prehliadačový klient (publishable key)
+      server.ts             # serverový klient s cookies používateľa
+      admin.ts              # service_role – `import 'server-only'`, iba webhooky/admin úlohy
+    stripe.ts               # `import 'server-only'`
+    platform/               # geolokácia, push, fotoaparát – rozhranie pre neskorší Capacitor
+  i18n/                     # konfigurácia next-intl (request.ts, routing)
+  types/database.ts         # GENEROVANÉ: `npm run db:types`
+messages/
+  sk.json  cs.json          # preklady (namespace = kľúč na najvyššej úrovni)
+public/icons/               # ikony PWA
 supabase/
-  migrations/           # SQL migrácie – jediný zdroj pravdy pre schému
-  functions/            # Edge Functions (Deno): revenuecat-webhook, delete-account
-  tests/                # pgTAP testy (RLS politiky, RPC funkcie)
-native-locales/         # systémové texty iOS (povolenia) v sk/cs
-scripts/db/             # lokálne DB testy bez Dockeru
+  migrations/               # SQL migrácie – jediný zdroj pravdy pre schému
+  functions/                # Edge Functions (Deno): delete-account, send-push
+  tests/                    # pgTAP testy (RLS politiky, RPC funkcie)
+e2e/                        # Playwright testy
+scripts/db/                 # lokálne DB testy bez Dockeru
+middleware.ts               # obnova Supabase session, ochrana rout
 ```
 
 ## Príkazy
 
 ```bash
-npm run check            # lint + typecheck + Jest – musí prejsť pred commitom
+npm run dev              # vývojový server
+npm run check            # lint + typecheck + Vitest – musí prejsť pred commitom
+npm run test:e2e         # Playwright (mobilný viewport)
 npm run test:db          # pgTAP testy (potrebuje `npx supabase start`)
-npm run test:db:local    # pgTAP testy bez Dockeru (Postgres + PostGIS + pgTAP lokálne)
+npm run test:db:local    # pgTAP testy bez Dockeru
 npm run db:types         # po každej migrácii
-npx expo install <pkg>   # vždy namiesto npm install pre Expo/RN balíčky
 ```
-
-Expo-špecifické pokyny (verzované dokumentácie, EAS, CNG) sú v @AGENTS.md.
 
 ## Konvencie kódu
 
 - TypeScript `strict`, **žiadne `any`** (ak treba, `unknown` + Zod parse).
 - Súbory `kebab-case.ts(x)`, komponenty `PascalCase`, hooky `useXxx`.
-- Named exporty; default export iba tam, kde ho vyžaduje Expo Router (`src/app/`).
-- Obrazovky v `src/app/` sú tenké – logika patrí do `src/features/*`.
+- Named exporty; default export iba tam, kde ho vyžaduje Next.js (`page.tsx`, `layout.tsx`, …).
+- Predvolene Server Components; `'use client'` iba tam, kde treba interakciu, Realtime alebo API prehliadača.
+- Stránky v `src/app/` sú tenké – logika patrí do `src/features/*`.
 - Import cez alias `@/` (= `src/`).
-- Dáta zo servera iba cez TanStack Query hooky v `features/*/api.ts`; žiadne volania Supabase priamo z komponentov.
+- Zápisy cez Server Actions alebo Route Handlers so Zod validáciou; čítanie v Server Components
+  alebo cez TanStack Query hooky v `features/*/api.ts`. Žiadne volania Supabase priamo v JSX komponentoch.
 - Typy DB sa nepíšu ručne – po každej migrácii spusti `npm run db:types`.
 - Schéma DB sa mení **iba cez migrácie** v `supabase/migrations/`, nikdy ručne v dashboarde.
-- `service_role` kľúč **nikdy** v aplikácii – iba v Edge Functions.
-- Prémiový prístup kontroluj cez RevenueCat **entitlements**, nie cez ID produktov. Serverovo chránené prémiové funkcie overuj podľa stavu uloženého z webhooku, nie podľa tvrdenia klienta.
+- Prémiový prístup overuje **server** podľa tabuľky `entitlements` (plní ju Stripe webhook), nikdy podľa tvrdenia klienta.
+- Kód pre API prehliadača (poloha, push, fotoaparát) iba cez `src/lib/platform/`, aby sa dal neskôr nahradiť Capacitor pluginmi.
 - Commity podľa Conventional Commits (`feat:`, `fix:`, `chore:`…).
-- Pred commitom musí prejsť: lint, typecheck, testy.
 
 ## ⛔ Nepreklenuteľné pravidlá
 
 ### 1. Poloha – nikdy presná GPS iných používateľov
-- Klient **nikdy** nedostane súradnice iného používateľa – ani v API odpovedi, ani v Realtime evente, ani v logu.
-- Vlastnú polohu ukladáme **zaokrúhlenú na mriežku ~500 m** (snap na grid na serveri, nie na klientovi).
-- Tabuľka s polohou je cez RLS nečitateľná pre klientov; pristupujú k nej iba `SECURITY DEFINER` RPC funkcie.
-- Vzdialenosť počíta **iba server** (PostGIS) a vracia ju zaokrúhlenú do pásiem:
-  - `< 1 km`
-  - 1–10 km po 1 km
-  - nad 10 km po 5 km
-- Ochrana proti trilaterácii: minimálne pásmo `< 1 km`, žiadne desatinné čísla, rate limit na aktualizáciu polohy aj na discovery dotazy.
+- Klient **nikdy** nedostane súradnice iného používateľa – ani v odpovedi API, ani v Realtime evente, ani v HTML zo servera, ani v logu.
+- Polohu získavame iba v popredí (Geolocation API), klient ju pred odoslaním zaokrúhli na 3 desatinné miesta a nikde ju neukladá (ani localStorage, ani cache service workera).
+- Server ju uloží **zaokrúhlenú na mriežku ~500 m** do tabuľky v schéme `private`, ktorú cez RLS klienti nečítajú; pristupujú k nej iba `SECURITY DEFINER` RPC funkcie.
+- Vzdialenosť počíta **iba server** (PostGIS) a vracia ju v pásmach: `< 1 km`, 1–10 km po 1 km, nad 10 km po 5 km.
+- Ochrana proti trilaterácii: minimálne pásmo `< 1 km`, žiadne desatinné čísla, radenie podľa pásma, rate limit na aktualizáciu polohy aj na discovery.
 - Používateľ môže zobrazenie svojej vzdialenosti úplne vypnúť.
-- Z nahraných fotiek sa pred uploadom odstraňujú EXIF metadáta (vrátane GPS).
-- Klient pred odoslaním zaokrúhli súradnice na 3 desatinné miesta a nikde ich neloguje ani neukladá.
+- Z fotiek sa pred uploadom odstraňujú EXIF metadáta (prekódovanie cez canvas v prehliadači; Storage prijíma iba JPEG/WebP).
 
 Implementácia: `private.user_locations`, `private.snap_to_grid`, `private.distance_bucket_km`,
-RPC `update_my_location` / `discover_nearby` / `get_profile` (migrácia `..._init.sql`);
-klient `src/features/discovery/location.ts` a `distance.ts`. Nové RPC nesmú vracať stĺpce
-s polohou – stráži to test `supabase/tests/01_location_privacy.test.sql`.
+RPC `update_my_location` / `discover_nearby` / `get_profile`. Nové RPC nesmú vracať stĺpce
+s polohou – stráži to `supabase/tests/01_location_privacy.test.sql`.
 
 ### 2. RLS na všetkých tabuľkách
 - Každá nová tabuľka má `ALTER TABLE … ENABLE ROW LEVEL SECURITY` **v tej istej migrácii**, kde vzniká.
 - Ku každej tabuľke explicitné politiky pre `select / insert / update / delete` – čo nie je povolené, je zakázané.
 - Blokovanie sa vynucuje na úrovni RLS: zablokovaní používatelia sa navzájom nevidia v discovery ani v chate.
-- Každá politika má pgTAP test v `supabase/tests/`; test `00_rls_enabled` zlyhá pri tabuľke bez RLS.
+- Každá politika má pgTAP test; test `00_rls_enabled` zlyhá pri tabuľke bez RLS.
 - K údajom **iných** používateľov (profily, fotky) sa pristupuje iba cez RPC, nie priamym SELECT-om.
-- Pozor: stĺpcové `GRANT/REVOKE` platia iba bez tabuľkového grantu (najprv `revoke update on …`).
+- `service_role` (admin klient) obchádza RLS – smie sa použiť iba v `src/lib/supabase/admin.ts` (Stripe webhook) a v Edge Functions, nikdy na čítanie dát pre bežnú požiadavku používateľa.
+- Stĺpcové `GRANT/REVOKE` platia iba bez tabuľkového grantu (najprv `revoke update on …`).
 - Žiadne `SECURITY DEFINER` funkcie bez explicitnej kontroly `auth.uid()` a nastaveného `search_path`.
 
-### 3. UI texty v slovenčine a češtine cez i18n
-- **Žiadne natvrdo napísané texty v UI** – všetko cez `t('namespace:key')`. Stráži to ESLint pravidlo `i18next/no-literal-string`.
-- Každý kľúč musí existovať v `sk` aj `cs` – kontroluje `src/__tests__/i18n-parity.test.ts`. Kľúče sú typovo kontrolované (`src/types/i18next.d.ts`).
-- Nový namespace pridaj do `src/locales/index.ts` pre oba jazyky.
-- Systémové texty povolení (iOS) sú v `native-locales/`.
-- Množné čísla cez i18next plurály (`_one`, `_few`, `_other`) – SK aj CZ majú tvar pre 2–4.
-- Jazyk sa berie zo zariadenia (`expo-localization`), fallback `sk`.
-- Dátumy a čísla formátuj cez `Intl` podľa aktívneho jazyka.
+### 3. Všetky UI texty v slovenčine a češtine
+- **Žiadne natvrdo napísané texty v UI** – všetko cez `next-intl` (`useTranslations` / `getTranslations`).
+  Stráži to ESLint pravidlo `i18next/no-literal-string` pre JSX.
+- Každý kľúč musí existovať v `messages/sk.json` aj `messages/cs.json` – kontroluje test parity; kľúče sú typovo kontrolované.
+- Platí aj pre `<title>`, metadata, manifest, e-maily, texty notifikácií a chybové hlášky.
+- Množné čísla cez ICU syntax (`{count, plural, one {…} few {…} other {…}}`) – SK aj CZ majú tvar pre 2–4.
+- Jazyk: cookie → `Accept-Language` → fallback `sk`. URL bez jazykového prefixu.
+- Dátumy a čísla cez formátovače `next-intl` podľa aktívneho jazyka.
+
+### 4. Žiadne tajné kľúče v repe
+- Tajomstvá (Supabase `service_role`, Stripe secret a webhook secret, VAPID private key) iba
+  v nastaveniach prostredia Vercel / Supabase secrets a v lokálnom `.env.local` (v `.gitignore`).
+- Prefix `NEXT_PUBLIC_` majú **iba** verejné hodnoty (Supabase URL, publishable key, Stripe publishable key, VAPID public key).
+- Moduly s tajomstvami začínajú `import 'server-only'`.
+- `.env.example` obsahuje iba názvy premenných, nikdy hodnoty.
+
+### 5. Mobile-first dizajn
+- Štýly sa píšu najprv pre mobil (šírka 360–430 px); `sm:`/`md:` breakpointy iba rozširujú.
+- Dotykové ciele min. 44 × 44 px, rešpektovať `env(safe-area-inset-*)`, ovládanie palcom v spodnej časti.
+- Primárna navigácia = spodná lišta; žiadne hover-only interakcie.
+- Každá obrazovka musí fungovať v nainštalovanej PWA (standalone) aj v prehliadači; e2e testy bežia na mobilnom viewporte.
+
+### 6. Notifikácie nikdy neobsahujú text správ ani mená
+- Payload Web Push obsahuje iba typ udalosti (napr. `{ "type": "message" }`) – žiadny text, meno, fotku ani ID používateľa.
+- Text notifikácie skladá service worker z prekladov (napr. „Nová správa“ / „Nová zpráva“).
+- Ikona a názov notifikácie sú neutrálne. Po kliknutí sa otvorí aplikácia, obsah sa načíta až po prihlásení.
+
+### 7. Nikdy nelogovať osobné údaje
+- Do `console`, logov Vercelu/Supabase, chybových hlásení ani analytiky nesmie ísť: poloha, obsah správ,
+  mená, e-mail, fotky či ich URL, údaje profilu, tokeny ani ID predplatiteľa v kombinácii s identitou.
+- Logujeme iba technické údaje (kód chyby, názov operácie, trvanie). Chyby pred odoslaním do monitoringu očisti.
+- Žiadne analytické ani reklamné skripty tretích strán bez schválenia.
 
 ## Databáza
 
@@ -139,8 +169,8 @@ Schéma je iba v `supabase/migrations/` (poradie podľa časovej pečiatky v ná
 | `public.messages` | správy v konverzácii | účastníci konverzácie bez bloku | odosielateľ v mene seba; príjemca mení iba `read_at` |
 | `public.blocks` | blok `blocker_id → blocked_id` | iba blokujúci | blokujúci (insert/delete) |
 | `public.reports` | nahlásenie používateľa | iba nahlasujúci | nahlasujúci (insert); riešenie cez service_role |
-| `public.entitlements` | **zdroj pravdy o prémiu** (`is_premium`, `expires_at`) | vlastník | iba webhook RevenueCat (service_role) |
-| `public.subscriptions` | prehľad predplatných z RevenueCat (produkt, obchod, expirácia) – len na zobrazenie | vlastník | iba webhook RevenueCat (service_role) |
+| `public.entitlements` | **zdroj pravdy o prémiu** (`is_premium`, `expires_at`) | vlastník | iba Stripe webhook (service_role) |
+| `public.subscriptions` | prehľad predplatných (produkt, expirácia, obnova) – len na zobrazenie | vlastník | iba Stripe webhook (service_role) |
 
 Pravidlá pre ďalšie kroky:
 - Nová tabuľka = nová migrácia s `enable row level security`, politikami pre select/insert/update/delete
@@ -158,6 +188,34 @@ Pravidlá pre ďalšie kroky:
 
 ## Ďalšie pravidlá súkromia a bezpečnosti
 - Fotky v **privátnom** Storage buckete, prístup iba cez podpísané URL s krátkou platnosťou.
-- Do logov, crash reportov ani analytiky nesmie ísť: poloha, obsah správ, orientácia, fotky, e-mail/telefón.
-- Push notifikácie nesmú prezradiť obsah ani kontext aplikácie na zamknutej obrazovke (napr. „Nová správa“, nie meno a text).
-- Zmazanie účtu skutočne maže dáta (vrátane súborov v Storage), nie iba soft-delete.
+- Service worker cachuje iba statické súbory aplikácie – **nikdy** odpovede API, stránky s osobnými údajmi ani podpísané URL fotiek.
+- Bezpečnostné hlavičky: CSP, `Referrer-Policy: no-referrer`, `Permissions-Policy` (geolokácia iba pre vlastnú doménu).
+- Zmazanie účtu skutočne maže dáta (vrátane Storage) a zruší predplatné v Stripe; nie iba soft-delete.
+- Stripe webhook overuje podpis; stav predplatného berie zo Stripe API, nie z tela udalosti.
+- Web Push na iOS funguje iba v PWA pridanej na plochu (iOS 16.4+) – UI to musí vysvetliť.
+
+## 🧹 Prechod z pôvodného Expo plánu (dočasné – po dokončení sekciu zmaž)
+
+Zmazať:
+- [ ] `app.json`, `AGENTS.md`, `.claude/settings.json` (Expo plugin), `native-locales/`, `assets/` (ikony Expo)
+- [ ] `src/app/*` (Expo Router obrazovky vrátane `(tabs)/likes.tsx`), `src/components/*`, `src/constants/`, `src/hooks/`, `src/providers/`
+- [ ] `src/lib/revenuecat.ts`, `src/lib/secure-storage.ts` + jeho test
+- [ ] `supabase/functions/revenuecat-webhook/`
+- [ ] lokálny súbor `yorky.bundle`
+- [ ] závislosti: `expo*`, `@expo/*`, `react-native*`, `react-native-purchases`, `jest`, `jest-expo`,
+      `@testing-library/react-native`, `eslint-config-expo`
+
+Prepísať:
+- [ ] `package.json`, `tsconfig.json`, `eslint.config.js` (eslint-config-next), `.gitignore` (`.next/`, `.vercel/`), `.prettierrc.json` (tailwind plugin)
+- [ ] `src/lib/supabase.ts` a `src/lib/env.ts` → `src/lib/supabase/{client,server,admin}.ts` a env pre `NEXT_PUBLIC_*`
+- [ ] `src/locales/*` → `messages/sk.json`, `messages/cs.json` (ICU plurály), `src/types/i18next.d.ts` → typy next-intl
+- [ ] `src/features/*` vrátane `likes/` → webové verzie (logiku `distance.ts`, zaokrúhlenie polohy a dotazy v `api.ts` zachovať; `person-row.tsx` prepísať na HTML + Tailwind)
+- [ ] `src/__tests__/*` → Vitest (zachovať testy parity prekladov, plurálov a pásiem vzdialenosti)
+- [ ] `.env.example`, `README.md`, `.github/workflows/ci.yml` (job aplikácie: Next build + Vitest + Playwright)
+- [ ] migrácie: komentáre o RevenueCat → Stripe (`..._init.sql`, `..._subscriptions.sql`); v `subscriptions` zúžiť `store` a stĺpce na Stripe;
+      pridať `stripe_customer_id` (do schémy `private`) a tabuľku `push_subscriptions` (RLS + testy)
+- [ ] `supabase/functions/delete-account` → pridať zrušenie Stripe predplatného a zmazanie push odberov
+
+Zachovať bez zmeny:
+- [ ] `supabase/migrations/` (schéma, RLS, PostGIS, rate limity, likes/matches), `supabase/tests/`, `scripts/db/`,
+      CI job pre databázu a workflow `.github/workflows/db-types.yml`
