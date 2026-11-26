@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { PageHeader } from '@/components/page-header';
+import { useStartConversation } from '@/features/chat/api';
 import { useIncomingLikes, useMatches, useToggleLike } from '@/features/likes/api';
 import { usePremium } from '@/features/premium/use-premium';
 
@@ -20,6 +22,8 @@ export function LikesView() {
   const matches = useMatches();
   const incoming = useIncomingLikes(isPremium);
   const like = useToggleLike();
+  const startChat = useStartConversation();
+  const router = useRouter();
   const [notice, setNotice] = useState<string>();
 
   const onToggle = async (person: Person) => {
@@ -31,7 +35,16 @@ export function LikesView() {
     }
   };
 
-  const renderList = (people: Person[], empty: string, actionLabel: string) =>
+  const onMessage = async (person: Person) => {
+    try {
+      const conversationId = await startChat.mutateAsync(person.user_id);
+      router.push(`/chat/${conversationId}`);
+    } catch {
+      setNotice(t('errors.chatFailed'));
+    }
+  };
+
+  const renderList = (people: Person[], empty: string, actionLabel: string, withMessage = false) =>
     people.length === 0 ? (
       <p className="text-muted text-sm">{empty}</p>
     ) : (
@@ -44,6 +57,15 @@ export function LikesView() {
                 age: tProfile('age', { count: person.age }),
               })}
             </span>
+            {withMessage ? (
+              <button
+                type="button"
+                onClick={() => void onMessage(person)}
+                disabled={startChat.isPending}
+                className="bg-foreground text-background min-h-11 rounded-xl px-4 text-sm font-semibold">
+                {t('actions.message')}
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => void onToggle(person)}
@@ -69,7 +91,7 @@ export function LikesView() {
         <h2 className="font-semibold">{t('matches.title')}</h2>
         {matches.isPending
           ? null
-          : renderList(matches.data ?? [], t('matches.empty'), t('actions.unmatch'))}
+          : renderList(matches.data ?? [], t('matches.empty'), t('actions.unmatch'), true)}
       </section>
 
       <section className="flex flex-col gap-2">
