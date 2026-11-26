@@ -1,8 +1,9 @@
 -- =============================================================================
 -- Yorky – predplatné (subscriptions)
 --
--- Prehľad predplatných z RevenueCat (jeden riadok na používateľa a produkt).
--- Zapisuje IBA webhook revenuecat-webhook (service_role).
+-- Prehľad predplatných (jeden riadok na používateľa a produkt; od migrácie
+-- 20261126000002 iba zo Stripe).
+-- Zapisuje IBA Stripe webhook (service_role).
 --
 -- Zdrojom pravdy o prémiu ostáva public.entitlements (+ private.has_premium).
 -- Z tejto tabuľky sa prémiový prístup NEodvodzuje (CLAUDE.md: entitlements,

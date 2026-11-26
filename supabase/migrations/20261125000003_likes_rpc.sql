@@ -45,7 +45,7 @@ begin
 end;
 $$;
 
--- Kto ma lajkol (a ešte nie je match). Prémiová funkcia – stav z webhooku RevenueCat.
+-- Kto ma lajkol (a ešte nie je match). Prémiová funkcia – stav zo Stripe webhooku.
 create or replace function public.list_incoming_likes()
 returns table (
   user_id uuid,

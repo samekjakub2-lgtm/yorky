@@ -1,0 +1,43 @@
+@import 'tailwindcss';
+
+/* Mobile-first: základné štýly sú pre telefón, sm:/md: iba rozširujú. */
+:root {
+  --background: #ffffff;
+  --foreground: #111118;
+  --muted: #6b6b76;
+  --surface: #f2f2f5;
+  --accent: #e0446c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b0b10;
+    --foreground: #f4f4f6;
+    --muted: #a0a0ab;
+    --surface: #1c1c24;
+    --accent: #ff5e87;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --spacing-safe-top: env(safe-area-inset-top);
+  --spacing-safe-bottom: env(safe-area-inset-bottom);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  overscroll-behavior-y: none;
+}

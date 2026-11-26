@@ -1,8 +1,11 @@
+'use client';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
-import { useSessionStore } from '@/features/auth/session-store';
-import { supabase } from '@/lib/supabase';
+import { useUserId } from '@/features/auth/user-context';
+import { likeProfile, unlikeProfile } from '@/features/likes/actions';
+import { createClient } from '@/lib/supabase/client';
 
 export const likesKeys = {
   all: ['likes'] as const,
@@ -13,13 +16,11 @@ export const likesKeys = {
 
 /** ID profilov, ktoré som lajkol (iba moje odoslané like-y). */
 export function useMyLikedIds() {
-  const userId = useSessionStore((s) => s.session?.user.id);
+  const userId = useUserId();
   return useQuery({
     queryKey: likesKeys.myLikes,
-    enabled: !!userId,
     queryFn: async () => {
-      if (!userId) return new Set<string>();
-      const { data, error } = await supabase
+      const { data, error } = await createClient()
         .from('likes')
         .select('likee_id')
         .eq('liker_id', userId);
@@ -35,6 +36,7 @@ export function useMatches() {
 
   // Realtime – RLS na matches zaručí, že prídu iba moje matche.
   useEffect(() => {
+    const supabase = createClient();
     const channel = supabase
       .channel('matches')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'matches' }, () =>
@@ -49,7 +51,7 @@ export function useMatches() {
   return useQuery({
     queryKey: likesKeys.matches,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('list_matches');
+      const { data, error } = await createClient().rpc('list_matches');
       if (error) throw error;
       return data;
     },
@@ -62,40 +64,32 @@ export function useIncomingLikes(isPremium: boolean) {
     queryKey: likesKeys.incoming,
     enabled: isPremium,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('list_incoming_likes');
+      const { data, error } = await createClient().rpc('list_incoming_likes');
       if (error) throw error;
       return data;
     },
   });
 }
 
-/** Lajkne profil. Vráti id matchu, ak bol like vzájomný, inak null. */
-export function useLikeProfile() {
+/** Lajkne alebo odlajkne profil; vráti id matchu pri vzájomnom like-u. */
+export function useToggleLike() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (otherUserId: string) => {
-      const { data, error } = await supabase.rpc('like_profile', { p_user_id: otherUserId });
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: likesKeys.all }),
-  });
-}
+  const liked = useMyLikedIds();
 
-/** Vezme like späť – server zruší aj prípadný match. */
-export function useUnlikeProfile() {
-  const queryClient = useQueryClient();
-  const userId = useSessionStore((s) => s.session?.user.id);
-  return useMutation({
-    mutationFn: async (otherUserId: string) => {
-      if (!userId) throw new Error('not authenticated');
-      const { error } = await supabase
-        .from('likes')
-        .delete()
-        .eq('liker_id', userId)
-        .eq('likee_id', otherUserId);
-      if (error) throw error;
+  const mutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const result = liked.data?.has(userId)
+        ? await unlikeProfile(userId)
+        : await likeProfile(userId);
+      if (!result.ok) throw new Error(result.error);
+      return result.data ?? null;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: likesKeys.all }),
   });
+
+  return {
+    isLiked: (userId: string) => liked.data?.has(userId) ?? false,
+    isPending: (userId: string) => mutation.isPending && mutation.variables === userId,
+    toggle: mutation.mutateAsync,
+  };
 }

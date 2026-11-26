@@ -1,50 +1,37 @@
-import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
+import type { ButtonHTMLAttributes } from 'react';
 
-import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
-
-type ButtonProps = {
-  label: string;
-  onPress: () => void;
-  disabled?: boolean;
-  loading?: boolean;
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'primary' | 'secondary' | 'danger';
+  loading?: boolean;
 };
 
-export function Button({ label, onPress, disabled, loading, variant = 'primary' }: ButtonProps) {
-  const theme = useTheme();
-  const backgroundColor =
-    variant === 'primary' ? theme.text : variant === 'danger' ? '#D93F3F' : theme.backgroundElement;
-  const color = variant === 'secondary' ? theme.text : theme.background;
+const VARIANTS = {
+  primary: 'bg-foreground text-background',
+  secondary: 'bg-surface text-foreground',
+  danger: 'bg-red-600 text-white',
+} as const;
 
+/** Tlačidlo s dotykovým cieľom min. 44 px (CLAUDE.md, pravidlo 5). */
+export function Button({
+  variant = 'primary',
+  loading = false,
+  disabled,
+  className = '',
+  children,
+  ...rest
+}: ButtonProps) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={onPress}
+    <button
+      type="button"
       disabled={disabled || loading}
-      style={({ pressed }) => [
-        styles.button,
-        { backgroundColor, opacity: disabled ? 0.5 : pressed ? 0.8 : 1 },
-      ]}>
+      aria-busy={loading}
+      className={`inline-flex min-h-12 w-full items-center justify-center rounded-2xl px-6 text-sm font-semibold transition-opacity active:opacity-80 disabled:opacity-50 ${VARIANTS[variant]} ${className}`}
+      {...rest}>
       {loading ? (
-        <ActivityIndicator color={color} />
+        <span className="size-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
       ) : (
-        <ThemedText type="smallBold" style={{ color }}>
-          {label}
-        </ThemedText>
+        children
       )}
-    </Pressable>
+    </button>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    minHeight: 48,
-    borderRadius: Spacing.three,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-});

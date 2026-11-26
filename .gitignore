@@ -3,24 +3,6 @@
 # dependencies
 node_modules/
 
-# Expo
-.expo/
-dist/
-web-build/
-expo-env.d.ts
-
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Metro
-.metro-health-check*
-
 # debug
 npm-debug.*
 yarn-debug.*
@@ -36,14 +18,25 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-example
-
-# generated native folders
-/ios
-/android
 
 # env (iba .env.example patrí do gitu)
 .env
 .env.*
 !.env.example
-yorky.bundle
+
+# Next.js / Vercel
+.next/
+out/
+.vercel/
+next-env.d.ts
+
+# Testy
+/test-results/
+/playwright-report/
+/coverage/
+
+# Tajomstvá
+*.pem
+*.key
+*.p12
+/.screens/

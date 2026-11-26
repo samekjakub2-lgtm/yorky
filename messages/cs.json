@@ -1,0 +1,123 @@
+{
+  "auth": {
+    "title": "Vítej v Yorky",
+    "subtitle": "Přihlas se e-mailem. Pošleme ti jednorázový kód.",
+    "emailLabel": "E-mail",
+    "emailPlaceholder": "jmeno@priklad.cz",
+    "sendCode": "Poslat kód",
+    "codeLabel": "Kód z e-mailu",
+    "verify": "Přihlásit se",
+    "changeEmail": "Změnit e-mail",
+    "ageNotice": "Aplikace je určena pouze pro osoby starší 18 let.",
+    "errors": {
+      "invalidEmail": "Zadej platný e-mail.",
+      "invalidCode": "Kód není platný nebo vypršel."
+    }
+  },
+  "chat": {
+    "title": "Zprávy",
+    "empty": "Zatím nemáš žádné konverzace.",
+    "inputPlaceholder": "Napiš zprávu…",
+    "send": "Odeslat",
+    "minutesAgo": "{count, plural, one {před # minutou} few {před # minutami} other {před # minutami}}"
+  },
+  "common": {
+    "appName": "Yorky",
+    "loading": "Načítám…",
+    "retry": "Zkusit znovu",
+    "cancel": "Zrušit",
+    "save": "Uložit",
+    "errors": {
+      "generic": "Něco se pokazilo. Zkus to znovu.",
+      "rateLimited": "Příliš mnoho pokusů. Chvíli počkej."
+    },
+    "tabs": {
+      "discovery": "Objevovat",
+      "likes": "Lajky",
+      "chat": "Zprávy",
+      "profile": "Profil",
+      "label": "Hlavní navigace"
+    },
+    "signedOut": "Odhlášen",
+    "nameAge": "{name}, {age}"
+  },
+  "discovery": {
+    "title": "Okolí",
+    "empty": "Zatím tu nikdo není.",
+    "like": "Lajknout",
+    "liked": "Lajknuto",
+    "distance": {
+      "lessThanOne": "< 1 km",
+      "km": "{count} km",
+      "hidden": "Vzdálenost skryta"
+    },
+    "location": {
+      "permissionTitle": "Povol přístup k poloze",
+      "permissionBody": "Ostatním ukážeme jen zaokrouhlenou vzdálenost, nikdy tvou přesnou polohu.",
+      "allow": "Povolit polohu",
+      "denied": "Bez polohy nemůžeme zobrazit lidi poblíž."
+    },
+    "peopleNearby": "{count, plural, one {# člověk poblíž} few {# lidé poblíž} other {# lidí poblíž}}",
+    "loading": "Načítám…"
+  },
+  "likes": {
+    "title": "Lajky",
+    "matches": {
+      "title": "Matche",
+      "empty": "Zatím nemáš žádný match. Až se lajknete navzájem, objeví se tady."
+    },
+    "incoming": {
+      "title": "Lajkli tě",
+      "empty": "Zatím tě nikdo nový nelajkl.",
+      "premiumOnly": "Kdo tě lajkl, uvidíš s prémiem."
+    },
+    "actions": {
+      "likeBack": "Lajknout zpět",
+      "unmatch": "Zrušit"
+    },
+    "matchTitle": "Máte match!",
+    "matchBody": "Ty a {name} jste se lajkli navzájem.",
+    "errors": {
+      "likeFailed": "Lajk se nepodařilo uložit. Zkus to znovu."
+    }
+  },
+  "profile": {
+    "title": "Můj profil",
+    "signOut": "Odhlásit se",
+    "deleteAccount": "Smazat účet",
+    "deleteAccountConfirm": "Opravdu chceš natrvalo smazat účet, fotky i zprávy? Tuto akci nelze vrátit.",
+    "hideDistance": "Skrýt mou vzdálenost",
+    "incognito": "Režim inkognito",
+    "premiumRequired": "Tato funkce je součástí Prémia.",
+    "addPhoto": "Přidat fotku",
+    "age": "{count, plural, one {# rok} few {# roky} other {# let}}",
+    "cancel": "Zrušit",
+    "deleteFailed": "Účet se nepodařilo smazat. Zkus to znovu."
+  },
+  "safety": {
+    "block": "Blokovat",
+    "report": "Nahlásit",
+    "reasons": {
+      "fake_profile": "Falešný profil",
+      "harassment": "Obtěžování",
+      "spam": "Spam",
+      "underage": "Nezletilá osoba",
+      "inappropriate_content": "Nevhodný obsah",
+      "other": "Jiné"
+    }
+  },
+  "meta": {
+    "title": "Yorky",
+    "description": "Seznamka pro gay, bi a queer muže na Slovensku a v Česku."
+  },
+  "push": {
+    "newMessageTitle": "Yorky",
+    "newMessageBody": "Máš novou zprávu.",
+    "newMatchTitle": "Yorky",
+    "newMatchBody": "Máš nový match.",
+    "iosHint": "Na iPhonu fungují upozornění jen po přidání Yorky na plochu (Sdílet → Přidat na plochu).",
+    "enable": "Zapnout upozornění",
+    "enabled": "Upozornění jsou zapnutá.",
+    "error": "Upozornění se nepodařilo zapnout."
+  }
+}

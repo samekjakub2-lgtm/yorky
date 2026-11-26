@@ -1,44 +1,27 @@
-import { StyleSheet, TextInput, type TextInputProps, View } from 'react-native';
+import { type InputHTMLAttributes, useId } from 'react';
 
-import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+type TextFieldProps = InputHTMLAttributes<HTMLInputElement> & { label: string; error?: string };
 
-type TextFieldProps = TextInputProps & { label: string; error?: string };
-
-export function TextField({ label, error, style, ...rest }: TextFieldProps) {
-  const theme = useTheme();
+export function TextField({ label, error, className = '', ...rest }: TextFieldProps) {
+  const id = useId();
+  const errorId = `${id}-error`;
   return (
-    <View style={styles.wrapper}>
-      <ThemedText type="small" themeColor="textSecondary">
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="text-muted text-sm">
         {label}
-      </ThemedText>
-      <TextInput
-        accessibilityLabel={label}
-        placeholderTextColor={theme.textSecondary}
-        style={[
-          styles.input,
-          { color: theme.text, backgroundColor: theme.backgroundElement },
-          style,
-        ]}
+      </label>
+      <input
+        id={id}
+        aria-invalid={!!error}
+        aria-describedby={error ? errorId : undefined}
+        className={`bg-surface placeholder:text-muted min-h-12 rounded-2xl px-4 text-base outline-none focus:ring-2 focus:ring-[var(--accent)] ${className}`}
         {...rest}
       />
       {error ? (
-        <ThemedText type="small" style={styles.error}>
+        <p id={errorId} role="alert" className="text-sm text-red-600">
           {error}
-        </ThemedText>
+        </p>
       ) : null}
-    </View>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: { gap: Spacing.one },
-  input: {
-    minHeight: 48,
-    borderRadius: Spacing.three,
-    paddingHorizontal: Spacing.three,
-    fontSize: 16,
-  },
-  error: { color: '#D93F3F' },
-});
