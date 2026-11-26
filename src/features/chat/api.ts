@@ -1,8 +1,10 @@
+'use client';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
-import { useSessionStore } from '@/features/auth/session-store';
-import { supabase } from '@/lib/supabase';
+import { sendMessage } from '@/features/chat/actions';
+import { createClient } from '@/lib/supabase/client';
 
 export const chatKeys = {
   conversations: ['chat', 'conversations'] as const,
@@ -13,7 +15,7 @@ export function useConversations() {
   return useQuery({
     queryKey: chatKeys.conversations,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await createClient()
         .from('conversations')
         .select('*')
         .order('last_message_at', { ascending: false, nullsFirst: false });
@@ -28,6 +30,7 @@ export function useMessages(conversationId: string) {
 
   // Realtime – RLS na messages zaručí, že prídu iba správy z mojich konverzácií.
   useEffect(() => {
+    const supabase = createClient();
     const channel = supabase
       .channel(`messages:${conversationId}`)
       .on(
@@ -49,7 +52,7 @@ export function useMessages(conversationId: string) {
   return useQuery({
     queryKey: chatKeys.messages(conversationId),
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await createClient()
         .from('messages')
         .select('*')
         .eq('conversation_id', conversationId)
@@ -63,25 +66,11 @@ export function useMessages(conversationId: string) {
 
 export function useSendMessage(conversationId: string) {
   const queryClient = useQueryClient();
-  const userId = useSessionStore((s) => s.session?.user.id);
   return useMutation({
     mutationFn: async (body: string) => {
-      if (!userId) throw new Error('not authenticated');
-      const { error } = await supabase
-        .from('messages')
-        .insert({ conversation_id: conversationId, sender_id: userId, body: body.trim() });
-      if (error) throw error;
+      const result = await sendMessage({ conversationId, body });
+      if (!result.ok) throw new Error(result.error);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: chatKeys.messages(conversationId) }),
-  });
-}
-
-export function useStartConversation() {
-  return useMutation({
-    mutationFn: async (otherUserId: string) => {
-      const { data, error } = await supabase.rpc('start_conversation', { p_other: otherUserId });
-      if (error) throw error;
-      return data;
-    },
   });
 }

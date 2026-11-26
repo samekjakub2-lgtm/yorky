@@ -1,12 +1,8 @@
-import { createInstance } from 'i18next';
+import { createTranslator } from 'next-intl';
+import { describe, expect, it } from 'vitest';
 
-import { resources } from '@/locales';
-
-async function makeT(lng: 'sk' | 'cs') {
-  const instance = createInstance();
-  await instance.init({ resources, lng, defaultNS: 'common' });
-  return instance.getFixedT(lng, 'discovery');
-}
+import cs from '../../messages/cs.json';
+import sk from '../../messages/sk.json';
 
 describe('slovenské a české plurály', () => {
   it.each([
@@ -16,8 +12,21 @@ describe('slovenské a české plurály', () => {
     ['cs', 1, '1 člověk poblíž'],
     ['cs', 4, '4 lidé poblíž'],
     ['cs', 12, '12 lidí poblíž'],
-  ] as const)('%s, %d → %s', async (lng, count, expected) => {
-    const t = await makeT(lng);
+  ] as const)('%s, %d → %s', (locale, count, expected) => {
+    const t = createTranslator({
+      locale,
+      messages: locale === 'sk' ? sk : cs,
+      namespace: 'discovery',
+    });
     expect(t('peopleNearby', { count })).toBe(expected);
+  });
+
+  it('vek: 5 rokov / 5 let', () => {
+    expect(
+      createTranslator({ locale: 'sk', messages: sk, namespace: 'profile' })('age', { count: 5 }),
+    ).toBe('5 rokov');
+    expect(
+      createTranslator({ locale: 'cs', messages: cs, namespace: 'profile' })('age', { count: 5 }),
+    ).toBe('5 let');
   });
 });

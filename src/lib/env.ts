@@ -1,16 +1,16 @@
 import { z } from 'zod';
 
-const EnvSchema = z.object({
-  EXPO_PUBLIC_SUPABASE_URL: z.url(),
-  EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
-  EXPO_PUBLIC_REVENUECAT_IOS_KEY: z.string().default(''),
-  EXPO_PUBLIC_REVENUECAT_ANDROID_KEY: z.string().default(''),
+/**
+ * Verejné premenné (prefix NEXT_PUBLIC_ – dostanú sa do prehliadača).
+ * Tajomstvá sem NIKDY nepatria – čítajú sa iba v moduloch s `import 'server-only'`.
+ */
+const PublicEnvSchema = z.object({
+  NEXT_PUBLIC_SUPABASE_URL: z.url(),
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
 });
 
-// Expo inlinuje iba priame prístupy `process.env.EXPO_PUBLIC_*`, preto ich vypisujeme explicitne.
-export const env = EnvSchema.parse({
-  EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
-  EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-  EXPO_PUBLIC_REVENUECAT_IOS_KEY: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY,
-  EXPO_PUBLIC_REVENUECAT_ANDROID_KEY: process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY,
+// Next.js inlinuje iba priame prístupy `process.env.NEXT_PUBLIC_*`.
+export const publicEnv = PublicEnvSchema.parse({
+  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
 });

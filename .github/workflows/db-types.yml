@@ -33,7 +33,8 @@ jobs:
       - name: Generate types
         run: |
           supabase gen types typescript --local > src/types/database.ts
-          npx --yes prettier@3 --write src/types/database.ts
+          # Bez projektového configu (ten načítava tailwind plugin z node_modules); rovnaké pravidlá.
+          npx --yes prettier@3 --no-config --single-quote --print-width 100 --trailing-comma all --bracket-same-line --write src/types/database.ts
       - name: Commit if changed
         run: |
           if git diff --quiet -- src/types/database.ts; then

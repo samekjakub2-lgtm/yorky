@@ -496,9 +496,8 @@
     }
   },
 
-  // Edge Functions. Webhook RevenueCat sa overuje vlastným tajomstvom, nie JWT.
+  // Edge Functions (Stripe webhook beží ako Next.js Route Handler na Verceli).
   "functions": {
-    "revenuecat-webhook": { "verify_jwt": false },
     "delete-account": { "verify_jwt": true }
   }
 }

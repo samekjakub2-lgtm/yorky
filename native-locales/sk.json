@@ -1,7 +1,0 @@
-{
-  "ios": {
-    "CFBundleDisplayName": "Yorky",
-    "NSLocationWhenInUseUsageDescription": "Yorky používa tvoju polohu iba na zobrazenie približnej vzdialenosti k ostatným. Tvoja presná poloha sa nikomu nezobrazuje.",
-    "NSPhotoLibraryUsageDescription": "Yorky potrebuje prístup k fotkám, aby si si ich mohol pridať do profilu."
-  }
-}

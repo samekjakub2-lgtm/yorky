@@ -54,7 +54,7 @@ create policy likes_select_outgoing on public.likes
   for select to authenticated
   using (liker_id = auth.uid());
 
--- likes: SELECT – kto lajkol mňa. Prémiová funkcia (stav z webhooku RevenueCat),
+-- likes: SELECT – kto lajkol mňa. Prémiová funkcia (stav zo Stripe webhooku),
 -- a nikdy nie od niekoho, s kým je blok.
 create policy likes_select_incoming_premium on public.likes
   for select to authenticated

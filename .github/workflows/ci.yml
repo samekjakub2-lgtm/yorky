@@ -8,6 +8,11 @@ on:
 jobs:
   app:
     runs-on: ubuntu-latest
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+      # Iba verejné hodnoty pre build a e2e – žiadne tajomstvá.
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -17,7 +22,10 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
-      - run: npm test -- --ci
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
 
   database:
     runs-on: ubuntu-latest
@@ -34,6 +42,7 @@ jobs:
       - name: Types match migrations
         run: |
           supabase gen types typescript --local > src/types/database.ts
-          npx --yes prettier@3 --write src/types/database.ts
+          # Bez projektového configu (ten načítava tailwind plugin z node_modules); rovnaké pravidlá.
+          npx --yes prettier@3 --no-config --single-quote --print-width 100 --trailing-comma all --bracket-same-line --write src/types/database.ts
           git diff --exit-code -- src/types/database.ts || {
             echo "::error::src/types/database.ts nesedí s migráciami – spusti npm run db:types"; exit 1; }

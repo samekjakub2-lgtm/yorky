@@ -163,7 +163,7 @@ create table public.messages (
 alter table public.messages enable row level security;
 create index messages_conversation_created_idx on public.messages (conversation_id, created_at desc);
 
--- Stav prémia zapisuje IBA webhook RevenueCat (service_role).
+-- Stav prémia zapisuje IBA Stripe webhook (service_role).
 create table public.entitlements (
   user_id uuid primary key references auth.users (id) on delete cascade,
   is_premium boolean not null default false,

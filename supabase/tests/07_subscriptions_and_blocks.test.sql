@@ -11,8 +11,8 @@ insert into public.profiles (id, display_name, birth_date) values
   ('00000000-0000-0000-0000-00000000000b', 'B', '1990-01-01'),
   ('00000000-0000-0000-0000-00000000000c', 'C', '1990-01-01');
 insert into public.subscriptions (user_id, product_id, store, expires_at) values
-  ('00000000-0000-0000-0000-00000000000a', 'yorky_premium_month', 'app_store', now() + interval '30 days'),
-  ('00000000-0000-0000-0000-00000000000b', 'yorky_premium_year', 'play_store', now() + interval '1 year');
+  ('00000000-0000-0000-0000-00000000000a', 'price_premium_month', 'stripe', now() + interval '30 days'),
+  ('00000000-0000-0000-0000-00000000000b', 'price_premium_year', 'stripe', now() + interval '1 year');
 insert into public.conversations (id, user_a, user_b) values
   ('00000000-0000-0000-0000-0000000000ab', '00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-00000000000b');
 insert into public.messages (conversation_id, sender_id, body) values
@@ -28,7 +28,7 @@ set local role authenticated;
 -- Predplatné ----------------------------------------------------------------------
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a"}', true);
 select is((select count(*)::int from public.subscriptions), 1, 'A vidí iba svoje predplatné');
-select is((select product_id from public.subscriptions), 'yorky_premium_month', 'A vidí svoj produkt');
+select is((select product_id from public.subscriptions), 'price_premium_month', 'A vidí svoj produkt');
 select throws_ok(
   $$ insert into public.subscriptions (user_id, product_id, store)
      values ('00000000-0000-0000-0000-00000000000a', 'fake', 'other') $$,

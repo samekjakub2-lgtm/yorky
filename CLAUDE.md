@@ -22,11 +22,11 @@ nedobrovoľnému outingu, vydieraniu alebo fyzickému ohrozeniu. Preto:
 
 | Oblasť | Technológia |
 |---|---|
-| Aplikácia | Next.js (App Router), TypeScript `strict`, Tailwind CSS |
+| Aplikácia | Next.js 16 (App Router, Turbopack), TypeScript `strict`, Tailwind CSS 4 |
 | Backend | Supabase – Postgres + PostGIS, Auth, Storage, Realtime, Edge Functions |
-| Auth v Next.js | `@supabase/ssr` (session v cookies, obnova v `middleware.ts`) |
+| Auth v Next.js | `@supabase/ssr` (session v cookies, obnova v `src/proxy.ts`; overenie cez `getClaims()`) |
 | i18n | `next-intl` – jazyky `sk`, `cs` |
-| PWA | Web App Manifest (`src/app/manifest.ts`), service worker (Serwist), Web Push (VAPID) |
+| PWA | Web App Manifest (`src/app/manifest.ts`), service worker (`@serwist/turbopack`), Web Push (VAPID) |
 | Platby | Stripe Checkout + Customer Portal, webhook → tabuľka `entitlements` |
 | Client state | TanStack Query (dáta v klientských komponentoch, Realtime) |
 | Validácia | Zod (formuláre, Server Actions, Route Handlers, Edge Functions) |
@@ -40,21 +40,29 @@ nedobrovoľnému outingu, vydieraniu alebo fyzickému ohrozeniu. Preto:
 src/
   app/
     (auth)/sign-in/         # prihlásenie e-mailovým OTP kódom
-    (app)/                  # chránená časť: discover, likes, chat, chat/[id], profile, premium
-    api/stripe/webhook/     # Route Handler pre Stripe webhook
-    manifest.ts             # Web App Manifest
-    sw.ts                   # zdroj service workera (Serwist)
+    (app)/                  # chránená časť: discover, likes, chat, profile (+ spodná navigácia)
+    api/stripe/webhook/     # Route Handler pre Stripe webhook (zatiaľ nie je)
+    serwist/[path]/route.ts # zostaví a servuje /serwist/sw.js
+    manifest.ts             # Web App Manifest (lokalizovaný)
+    sw.ts                   # zdroj service workera (cache iba statiky, Web Push)
+    providers.tsx           # TanStack Query + registrácia service workera
   components/               # znovupoužiteľné UI komponenty (bez dátovej logiky)
   features/                 # doménová logika podľa funkcie
+    <feature>/actions.ts    #   Server Actions ('use server', Zod) – všetky zápisy
+    <feature>/api.ts        #   TanStack Query hooky – čítanie v klientovi
+    <feature>/*-view.tsx    #   klientské UI danej obrazovky
     auth/ discovery/ likes/ profile/ chat/ premium/ safety/ push/
   lib/
     supabase/
       client.ts             # prehliadačový klient (publishable key)
       server.ts             # serverový klient s cookies používateľa
       admin.ts              # service_role – `import 'server-only'`, iba webhooky/admin úlohy
-    stripe.ts               # `import 'server-only'`
-    platform/               # geolokácia, push, fotoaparát – rozhranie pre neskorší Capacitor
-  i18n/                     # konfigurácia next-intl (request.ts, routing)
+    action-result.ts        # jednotný výsledok Server Actions + mapovanie DB chýb
+    env.ts                  # verejné NEXT_PUBLIC_* premenné (Zod)
+    platform/               # geolokácia, obrázky (EXIF), push – rozhranie pre neskorší Capacitor
+  i18n/                     # next-intl: config.ts (jazyky), request.ts (výber jazyka)
+  proxy.ts                  # (Next 16 náhrada middleware) obnova session, ochrana rout
+  __tests__/                # Vitest
   types/database.ts         # GENEROVANÉ: `npm run db:types`
 messages/
   sk.json  cs.json          # preklady (namespace = kľúč na najvyššej úrovni)
@@ -63,17 +71,22 @@ supabase/
   migrations/               # SQL migrácie – jediný zdroj pravdy pre schému
   functions/                # Edge Functions (Deno): delete-account, send-push
   tests/                    # pgTAP testy (RLS politiky, RPC funkcie)
-e2e/                        # Playwright testy
+e2e/                        # Playwright testy (mobilný viewport)
 scripts/db/                 # lokálne DB testy bez Dockeru
-middleware.ts               # obnova Supabase session, ochrana rout
+AGENTS.md                   # pokyny Next.js pre agentov (generuje `next dev`, needituj)
 ```
+
+Next.js 16 sa líši od starších verzií (napr. `middleware.ts` → `proxy.ts`). Pred písaním kódu
+pre Next.js si prečítaj príslušný návod v `node_modules/next/dist/docs/` (viď @AGENTS.md).
+`cacheComponents` je vypnuté – aplikácia je takmer celá personalizovaná (cookies).
 
 ## Príkazy
 
 ```bash
 npm run dev              # vývojový server
 npm run check            # lint + typecheck + Vitest – musí prejsť pred commitom
-npm run test:e2e         # Playwright (mobilný viewport)
+npm run build            # produkčný build (potrebuje NEXT_PUBLIC_* premenné)
+npm run test:e2e         # Playwright (mobilný viewport, spúšťa `next start` nad buildom)
 npm run test:db          # pgTAP testy (potrebuje `npx supabase start`)
 npm run test:db:local    # pgTAP testy bez Dockeru
 npm run db:types         # po každej migrácii
@@ -130,7 +143,7 @@ s polohou – stráži to `supabase/tests/01_location_privacy.test.sql`.
 - Dátumy a čísla cez formátovače `next-intl` podľa aktívneho jazyka.
 
 ### 4. Žiadne tajné kľúče v repe
-- Tajomstvá (Supabase `service_role`, Stripe secret a webhook secret, VAPID private key) iba
+- Tajomstvá (`SUPABASE_SECRET_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `VAPID_PRIVATE_KEY`) iba
   v nastaveniach prostredia Vercel / Supabase secrets a v lokálnom `.env.local` (v `.gitignore`).
 - Prefix `NEXT_PUBLIC_` majú **iba** verejné hodnoty (Supabase URL, publishable key, Stripe publishable key, VAPID public key).
 - Moduly s tajomstvami začínajú `import 'server-only'`.
@@ -170,7 +183,9 @@ Schéma je iba v `supabase/migrations/` (poradie podľa časovej pečiatky v ná
 | `public.blocks` | blok `blocker_id → blocked_id` | iba blokujúci | blokujúci (insert/delete) |
 | `public.reports` | nahlásenie používateľa | iba nahlasujúci | nahlasujúci (insert); riešenie cez service_role |
 | `public.entitlements` | **zdroj pravdy o prémiu** (`is_premium`, `expires_at`) | vlastník | iba Stripe webhook (service_role) |
-| `public.subscriptions` | prehľad predplatných (produkt, expirácia, obnova) – len na zobrazenie | vlastník | iba Stripe webhook (service_role) |
+| `public.subscriptions` | prehľad predplatných zo Stripe (produkt, expirácia, obnova) – len na zobrazenie | vlastník | iba Stripe webhook (service_role) |
+| `public.push_subscriptions` | Web Push odbery (endpoint + kľúče, nič iné) | vlastník | vlastník (insert/delete), bez update |
+| `public.stripe_customers` | `user_id → customer_id` | nikto z klientov | iba service_role (webhook, `delete-account`) |
 
 Pravidlá pre ďalšie kroky:
 - Nová tabuľka = nová migrácia s `enable row level security`, politikami pre select/insert/update/delete
@@ -194,28 +209,10 @@ Pravidlá pre ďalšie kroky:
 - Stripe webhook overuje podpis; stav predplatného berie zo Stripe API, nie z tela udalosti.
 - Web Push na iOS funguje iba v PWA pridanej na plochu (iOS 16.4+) – UI to musí vysvetliť.
 
-## 🧹 Prechod z pôvodného Expo plánu (dočasné – po dokončení sekciu zmaž)
+## Rozpracované (ďalšie kroky)
 
-Zmazať:
-- [ ] `app.json`, `AGENTS.md`, `.claude/settings.json` (Expo plugin), `native-locales/`, `assets/` (ikony Expo)
-- [ ] `src/app/*` (Expo Router obrazovky vrátane `(tabs)/likes.tsx`), `src/components/*`, `src/constants/`, `src/hooks/`, `src/providers/`
-- [ ] `src/lib/revenuecat.ts`, `src/lib/secure-storage.ts` + jeho test
-- [ ] `supabase/functions/revenuecat-webhook/`
-- [ ] lokálny súbor `yorky.bundle`
-- [ ] závislosti: `expo*`, `@expo/*`, `react-native*`, `react-native-purchases`, `jest`, `jest-expo`,
-      `@testing-library/react-native`, `eslint-config-expo`
-
-Prepísať:
-- [ ] `package.json`, `tsconfig.json`, `eslint.config.js` (eslint-config-next), `.gitignore` (`.next/`, `.vercel/`), `.prettierrc.json` (tailwind plugin)
-- [ ] `src/lib/supabase.ts` a `src/lib/env.ts` → `src/lib/supabase/{client,server,admin}.ts` a env pre `NEXT_PUBLIC_*`
-- [ ] `src/locales/*` → `messages/sk.json`, `messages/cs.json` (ICU plurály), `src/types/i18next.d.ts` → typy next-intl
-- [ ] `src/features/*` vrátane `likes/` → webové verzie (logiku `distance.ts`, zaokrúhlenie polohy a dotazy v `api.ts` zachovať; `person-row.tsx` prepísať na HTML + Tailwind)
-- [ ] `src/__tests__/*` → Vitest (zachovať testy parity prekladov, plurálov a pásiem vzdialenosti)
-- [ ] `.env.example`, `README.md`, `.github/workflows/ci.yml` (job aplikácie: Next build + Vitest + Playwright)
-- [ ] migrácie: komentáre o RevenueCat → Stripe (`..._init.sql`, `..._subscriptions.sql`); v `subscriptions` zúžiť `store` a stĺpce na Stripe;
-      pridať `stripe_customer_id` (do schémy `private`) a tabuľku `push_subscriptions` (RLS + testy)
-- [ ] `supabase/functions/delete-account` → pridať zrušenie Stripe predplatného a zmazanie push odberov
-
-Zachovať bez zmeny:
-- [ ] `supabase/migrations/` (schéma, RLS, PostGIS, rate limity, likes/matches), `supabase/tests/`, `scripts/db/`,
-      CI job pre databázu a workflow `.github/workflows/db-types.yml`
+- Stripe: Checkout + Customer Portal, Route Handler `api/stripe/webhook` (podpis, stav zo Stripe API → `entitlements`, `subscriptions`, `stripe_customers`).
+- Edge Function `send-push` (VAPID, payload iba `{ "type": … }`), spúšťaná DB webhookom na `messages`/`matches`.
+- Chat: riadky konverzácií (cez RPC), stránka `chat/[id]`.
+- Fotky: upload v profile a zobrazenie cez podpísané URL; obrazovka premium; export dát (GDPR).
+- CSP hlavička (s nonce) a ikony podľa dizajnu.
